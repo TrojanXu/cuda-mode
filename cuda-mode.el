@@ -1,3 +1,19 @@
+;; cuda-mode.el --- -*- lexical-binding: t; -*-
+
+;; Author: Sergey Vinokurov <serg.foo@gmail.com>
+;; Created: Saturday, 20 July 2013
+;; Description:
+;; This is mode for editing CUDA source files.
+;;
+;; Quick setup:
+;; (autoload 'cuda-mode "cuda-mode" nil t)
+;; (add-to-list 'auto-mode-alist '("\\.cuh?\\'" . cuda-mode))
+;;
+;; Authorship notice:
+;; I could not figure out initial author for this mode and therefore I'm
+;; not claiming all the work.
+
+
 ;; Note: The interface used in this file requires CC Mode 5.30 or
 ;; later.
 
@@ -38,18 +54,56 @@ Do not try to modify this list for end user customizations; the
 the appropriate place for that."
   cuda
   (append
-   '("dim3"
-	 "char1" "uchar1" "char2" "uchar2" "char3" "uchar3" "char4" "uchar4"
-	 "short1" "ushort1" "short2" "ushort2" "short3" "ushort3" "short4" "ushort4"
-	 "int1" "uint1" "int2" "uint2" "int3" "uint3" "int4" "uint4"
-	 "long1" "ulong1" "long2" "ulong2" "long3" "ulong3" "long4" "ulong4"
-	 "float1" "float2"  "float3" "float4"
-	 "double1" "double2" )
+   '("char1"
+     "char2"
+     "char3"
+     "char4"
+     "dim1"
+     "dim2"
+     "dim3"
+     "dim4"
+     "double1"
+     "double2"
+     "double3"
+     "double4"
+     "float1"
+     "float2"
+     "float3"
+     "float4"
+     "int1"
+     "int2"
+     "int3"
+     "int4"
+     "long1"
+     "long2"
+     "long3"
+     "long4"
+     "short1"
+     "short2"
+     "short3"
+     "short4"
+     "uchar1"
+     "uchar2"
+     "uchar3"
+     "uchar4"
+     "uint1"
+     "uint2"
+     "uint3"
+     "uint4"
+     "ulong1"
+     "ulong2"
+     "ulong3"
+     "ulong4"
+     "ushort1"
+     "ushort2"
+     "ushort3"
+     "ushort4")
+
    ;; Use append to not be destructive on the
    ;; return value below.
    (append
-	(c-lang-const c-primitive-type-kwds)
-	nil)))
+    (c-lang-const c-primitive-type-kwds)
+    nil)))
 
 (c-lang-defconst c-type-modifier-keywds
   "Type modifier keywords.  These can occur almost anywhere in types
@@ -57,32 +111,34 @@ but they don't build a type of themselves.  Unlike the keywords on
 `c-primitive-type-kwds', they are fontified with the keyword face and
 not the type face."
   cuda
-    (append
-      '("__device__", "__global__", "__shared__", "__host__", "__constant__")
-      (c-lang-const c-type-modifier-keywds)
-      nil))
+  (append
+   '("__constant__" "__device__" "__global__" "__host__" "__shared__")
+   (c-lang-const c-type-modifier-keywds)
+   nil))
 
 (c-lang-defconst c-other-op-syntax-tokens
   "List of the tokens made up of characters in the punctuation or
 parenthesis syntax classes that have uses other than as expression
 operators."
   cuda
-  (append '("#" "##"	; Used by cpp.
-	    "::" "..." "<<<" ">>>")
-	  (c-lang-const c-other-op-syntax-tokens)))
+  (append '("#" "##"                    ; Used by cpp.
+            "::" "..." "<<<" ">>>")
+          (c-lang-const c-other-op-syntax-tokens)))
 
 (c-lang-defconst c-primary-expr-kwds
   "Keywords besides constants and operators that start primary expressions."
-  cuda  '("gridDim" "blockIdx" "blockDim" "threadIdx" "warpSize"))
+  cuda
+  '("blockIdx" "blockDim" "gridDim" "threadIdx" "warpSize"))
 
 (c-lang-defconst c-paren-nontype-kwds
   "Keywords that may be followed by a parenthesis expression that doesn't
 contain type identifiers."
-  cuda       nil
-  (c c++) '(;; GCC extension.
-	    "__attribute__"
-	    ;; MSVC extension.
-	    "__declspec"))
+  cuda
+  nil
+  (c c++) '( ;; GCC extension.
+            "__attribute__"
+            ;; MSVC extension.
+            "__declspec"))
 
 (defcustom cuda-font-lock-extra-types nil
   "*List of extra types (aside from the type keywords) to recognize in Cuda mode.
@@ -100,40 +156,199 @@ Each list item should be a regexp matching a single identifier.")
   (c-lang-const c-matchers-3 cuda)
   "Accurate normal highlighting for CUDA mode.")
 
-(defvar cuda-font-lock-keywords cuda-font-lock-keywords-3
+(defvar cuda-font-lock-keywords
+  (append cuda-font-lock-keywords-3
+          `((,(rx bos
+                  (or
+                   ;; atom
+                   "atomicAdd"
+                   "atomicAnd"
+                   "atomicCAS"
+                   "atomicDec"
+                   "atomicExch"
+                   "atomicInc"
+                   "atomicMax"
+                   "atomicMin"
+                   "atomicOr"
+                   "atomicSub"
+                   "atomicXor"
+
+                   ;; cudadev
+                   "tex1D"
+                   "tex1Dfetch"
+                   "tex2D"
+                   "__float_as_int"
+                   "__int_as_float"
+                   "__float2int_rn"
+                   "__float2int_rz"
+                   "__float2int_ru"
+                   "__float2int_rd"
+                   "__float2uint_rn"
+                   "__float2uint_rz"
+                   "__float2uint_ru"
+                   "__float2uint_rd"
+                   "__int2float_rn"
+                   "__int2float_rz"
+                   "__int2float_ru"
+                   "__int2float_rd"
+                   "__uint2float_rn"
+                   "__uint2float_rz"
+                   "__uint2float_ru"
+                   "__uint2float_rd"
+                   "__fadd_rz"
+                   "__fmul_rz"
+                   "__fdividef"
+                   "__mul24"
+                   "__umul24"
+                   "__mulhi"
+                   "__umulhi"
+                   "__mul64hi"
+                   "__umul64hi"
+                   "min"
+                   "umin"
+                   "fminf"
+                   "fmin"
+                   "max"
+                   "umax"
+                   "fmaxf"
+                   "fmax"
+                   "abs"
+                   "fabsf"
+                   "fabs"
+                   "sqrtf"
+                   "sqrt"
+                   "sinf"
+                   "__sinf"
+                   "sin"
+                   "cosf"
+                   "__cosf"
+                   "cos"
+                   "sincosf"
+                   "__sincosf"
+                   "expf"
+                   "__expf"
+                   "exp"
+                   "logf"
+                   "__logf"
+                   "log"
+
+                   ;; runtime
+                   "cudaBindTexture"
+                   "cudaBindTextureToArray"
+                   "cudaChooseDevice"
+                   "cudaConfigureCall"
+                   "cudaCreateChannelDesc"
+                   "cudaD3D10GetDevice"
+                   "cudaD3D10MapResources"
+                   "cudaD3D10RegisterResource"
+                   "cudaD3D10ResourceGetMappedArray"
+                   "cudaD3D10ResourceGetMappedPitch"
+                   "cudaD3D10ResourceGetMappedPointer"
+                   "cudaD3D10ResourceGetMappedSize"
+                   "cudaD3D10ResourceGetSurfaceDimensions"
+                   "cudaD3D10ResourceSetMapFlags"
+                   "cudaD3D10SetDirect3DDevice"
+                   "cudaD3D10UnmapResources"
+                   "cudaD3D10UnregisterResource"
+                   "cudaD3D9GetDevice"
+                   "cudaD3D9GetDirect3DDevice"
+                   "cudaD3D9MapResources"
+                   "cudaD3D9RegisterResource"
+                   "cudaD3D9ResourceGetMappedArray"
+                   "cudaD3D9ResourceGetMappedPitch"
+                   "cudaD3D9ResourceGetMappedPointer"
+                   "cudaD3D9ResourceGetMappedSize"
+                   "cudaD3D9ResourceGetSurfaceDimensions"
+                   "cudaD3D9ResourceSetMapFlags"
+                   "cudaD3D9SetDirect3DDevice"
+                   "cudaD3D9UnmapResources"
+                   "cudaD3D9UnregisterResource"
+                   "cudaEventCreate"
+                   "cudaEventDestroy"
+                   "cudaEventElapsedTime"
+                   "cudaEventQuery"
+                   "cudaEventRecord"
+                   "cudaEventSynchronize"
+                   "cudaFree"
+                   "cudaFreeArray"
+                   "cudaFreeHost "
+                   "cudaGetChannelDesc"
+                   "cudaGetDevice"
+                   "cudaGetDeviceCount"
+                   "cudaGetDeviceProperties"
+                   "cudaGetErrorString"
+                   "cudaGetLastError"
+                   "cudaGetSymbolAddress"
+                   "cudaGetSymbolSize"
+                   "cudaGetTextureAlignmentOffset"
+                   "cudaGetTextureReference"
+                   "cudaGLMapBufferObject"
+                   "cudaGLRegisterBufferObject"
+                   "cudaGLSetGLDevice"
+                   "cudaGLUnmapBufferObject"
+                   "cudaGLUnregisterBufferObject"
+                   "cudaLaunch"
+                   "cudaMalloc"
+                   "cudaMalloc3D"
+                   "cudaMalloc3DArray"
+                   "cudaMallocArray"
+                   "cudaMallocHost"
+                   "cudaMallocPitch"
+                   "cudaMemcpy"
+                   "cudaMemcpy2D"
+                   "cudaMemcpy2DArrayToArray"
+                   "cudaMemcpy2DFromArray"
+                   "cudaMemcpy2DToArray"
+                   "cudaMemcpy3D"
+                   "cudaMemcpyArrayToArray"
+                   "cudaMemcpyFromArray"
+                   "cudaMemcpyFromSymbol"
+                   "cudaMemcpyToArray"
+                   "cudaMemcpyToSymbol"
+                   "cudaMemset"
+                   "cudaMemset2D"
+                   "cudaMemset3D"
+                   "cudaSetDevice"
+                   "cudaSetupArgument"
+                   "cudaStreamCreate"
+                   "cudaStreamDestroy"
+                   "cudaStreamQuery"
+                   "cudaStreamSynchronize"
+                   "cudaThreadExit"
+                   "cudaThreadSynchronize"
+                   "cudaUnbindTexture")
+                  eol)
+             (0 'font-lock-function-name-face))))
   "Default expressions to highlight in CUDA mode.")
 
 (defvar cuda-mode-syntax-table nil
   "Syntax table used in cuda-mode buffers.")
 (or cuda-mode-syntax-table
     (setq cuda-mode-syntax-table
-      (funcall (c-lang-const c-make-mode-syntax-table cuda))))
+          (funcall (c-lang-const c-make-mode-syntax-table cuda))))
 
 (defvar cuda-mode-abbrev-table nil
   "Abbreviation table used in cuda-mode buffers.")
 
 (c-define-abbrev-table 'cuda-mode-abbrev-table
-  ;; Keywords that if they occur first on a line might alter the
-  ;; syntactic context, and which therefore should trig reindentation
-  ;; when they are completed.
-  '(("else" "else" c-electric-continued-statement 0)
-    ("while" "while" c-electric-continued-statement 0)))
+                       ;; Keywords that if they occur first on a line might alter the
+                       ;; syntactic context, and which therefore should trig reindentation
+                       ;; when they are completed.
+                       '(("else" "else" c-electric-continued-statement 0)
+                         ("while" "while" c-electric-continued-statement 0)))
 
 (defvar cuda-mode-map (let ((map (c-make-inherited-keymap)))
-              ;; Add bindings which are only useful for CUDA
-              map)
+                        ;; Add bindings which are only useful for CUDA
+                        map)
   "Keymap used in cuda-mode buffers.")
 
 (easy-menu-define cuda-menu cuda-mode-map "CUDA Mode Commands"
-          ;; Can use `cuda' as the language for `c-mode-menu'
-          ;; since its definition covers any language.  In
-          ;; this case the language is used to adapt to the
-          ;; nonexistence of a cpp pass and thus removing some
-          ;; irrelevant menu alternatives.
-          (cons "CUDA" (c-lang-const c-mode-menu cuda)))
-
-;;;###Autoload
-(add-to-list 'auto-mode-alist '("\\.cu\\'" . cuda-mode))
+  ;; Can use `cuda' as the language for `c-mode-menu'
+  ;; since its definition covers any language.  In
+  ;; this case the language is used to adapt to the
+  ;; nonexistence of a cpp pass and thus removing some
+  ;; irrelevant menu alternatives.
+  (cons "CUDA" (c-lang-const c-mode-menu cuda)))
 
 ;;;###autoload
 (defun cuda-mode ()
@@ -150,9 +365,9 @@ Key bindings:
   (c-initialize-cc-mode t)
   (set-syntax-table cuda-mode-syntax-table)
   (setq major-mode 'cuda-mode
-    mode-name "Cuda"
-    local-abbrev-table cuda-mode-abbrev-table
-    abbrev-mode t)
+        mode-name "Cuda"
+        local-abbrev-table cuda-mode-abbrev-table
+        abbrev-mode t)
   (use-local-map c-mode-map)
   ;; `c-init-language-vars' is a macro that is expanded at compile
   ;; time to a large `setq' with all the language variables and their
@@ -172,3 +387,8 @@ Key bindings:
 
 
 (provide 'cuda-mode)
+
+;; Local Variables:
+;; End:
+
+;; cuda-mode.el ends here
