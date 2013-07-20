@@ -316,7 +316,10 @@ Each list item should be a regexp matching a single identifier.")
                    "cudaStreamSynchronize"
                    "cudaThreadExit"
                    "cudaThreadSynchronize"
-                   "cudaUnbindTexture")
+                   "cudaUnbindTexture"
+
+                   ;; other
+                   "__syncthreads")
                   eol)
              (0 'font-lock-function-name-face))))
   "Default expressions to highlight in CUDA mode.")
